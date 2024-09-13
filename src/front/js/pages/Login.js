@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import '../../styles/login.css';
 
 
 const Login = () => {
@@ -12,7 +11,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        const response = await fetch('https://didactic-tribble-r47jpj7qggwxf54w7-3000.app.github.dev/api/login', {
+        const response = await fetch('https://didactic-tribble-r47jpj7qggwxf54w7-5000.app.github.dev/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -31,7 +30,7 @@ const Login = () => {
     };
 
     return (
-        <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="d-flex justify-content-center align-items-center vh-90">
             <div className="card p-4" style={{ width: '400px' }}>
                 <h2 className="text-center mb-4">Login</h2>
                 <form onSubmit={handleLogin}>

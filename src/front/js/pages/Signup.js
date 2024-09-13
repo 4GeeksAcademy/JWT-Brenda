@@ -1,61 +1,94 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
-export function Signup() {
-    const navigate = useNavigate();
+const Signup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
 
-    const handleSignup = () => {
-        if (password !== passwordConfirmation) {
-            setErrorMessage('Password and password confirmation do not match');
+    const handleSignup = async (e) => {
+        e.preventDefault();
+
+        // Verificar que las contraseñas coincidan
+        if (password !== confirmPassword) {
+            setErrorMessage("Passwords do not match");
             return;
         }
 
-        fetch('https://didactic-tribble-r47jpj7qggwxf54w7-3000.app.github.dev/api/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data.token) {
-                sessionStorage.setItem('token', data.token);  // Usamos sessionStorage aquí
-                setEmail('');
-                setPassword('');
-                setPasswordConfirmation('');
-                navigate('/private');
+        try {
+            const response = await fetch('https://didactic-tribble-r47jpj7qggwxf54w7-5000.app.github.dev/api/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (response.ok) {
+                const { token } = await response.json();
+                sessionStorage.setItem('token', token);  // Almacenar el token en sessionStorage
+                navigate('/private'); // Redirigir a la página privada después del registro
             } else {
-                setErrorMessage("Signup failed");
+                const errorData = await response.json();
+                setErrorMessage(errorData.error || 'Signup failed');  // Mostrar el mensaje de error del servidor
             }
-        })
-        .catch((err) => {
-            setErrorMessage("Error: " + err.message || "Internal Server Error");
-        });
+        } catch (error) {
+            console.error('Error during signup:', error);
+            setErrorMessage('Network error or server not responding');
+        }
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <h2>Signup</h2>
-            <form
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSignup();
-                }}
-                style={{ display: 'flex', flexDirection: 'column', width: '30%' }}>
-                <label>Email:</label>
-                <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                <label>Password:</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <label>Password Confirmation:</label>
-                <input type="password" value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} required />
-                <button type="submit" style={{ marginTop: '1rem' }}>Signup</button>
-                {errorMessage && <p style={{ color: 'red', marginTop: '1rem' }}>{errorMessage}</p>}
-            </form>
+        <div className="d-flex justify-content-center align-items-center vh-90">
+            <div className="card p-4" style={{ width: '400px' }}>
+                <h2 className="text-center mb-4">Sign Up</h2>
+                <form onSubmit={handleSignup}>
+                    <div className="mb-3">
+                        <label htmlFor="email" className="form-label">Email</label>
+                        <input
+                            type="email"
+                            className="form-control"
+                            id="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="password" className="form-label">Password</label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            id="password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            id="confirmPassword"
+                            placeholder="Confirm your password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    {errorMessage && <p className="text-danger">{errorMessage}</p>}
+                    <div className="d-grid">
+                        <button type="submit" className="btn btn-primary">Sign Up</button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
-}
+};
+
+export default Signup;
